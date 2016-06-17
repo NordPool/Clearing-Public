@@ -1,71 +1,43 @@
 ﻿namespace NordPool.ClearingTradeCaptureAPI.Sample
 {
     using System;
-    using System.Collections.Generic;
-    using System.Configuration;
-    using System.Net.Http;
-    using System.Threading.Tasks;
-
-    using Newtonsoft.Json;
-
-    using Thinktecture.IdentityModel.Client;
 
     public class Program
     {
         public static void Main(string[] args)
         {
-            string clientId = GetAppSettingValue("IdentityServer_ClientId");
-            string clientSecret = GetAppSettingValue("IdentityServer_ClientSecret");
-            string scope = GetAppSettingValue("IdentityServer_Scope");
-
-            string userName = GetAppSettingValue("Member_UserName");
-            string password = GetAppSettingValue("Member_Password");
-
-            OAuth2Client oAuth2Client = new OAuth2Client(new Uri("https://sts.nordpoolgroupppe.com/connect/token"),
-                clientId,
-                clientSecret,
-                OAuth2Client.ClientAuthenticationStyle.PostValues);
-
-            Task<TokenResponse> tokenRequestTask = oAuth2Client.RequestResourceOwnerPasswordAsync(userName, password, scope);
-            TokenResponse tokenResponse = tokenRequestTask.Result;
-
-            HttpClient httpClient = new HttpClient();
-            httpClient.SetBearerToken(tokenResponse.AccessToken);
-
-            string todayDate = DateTime.Now.Date.ToString("yyyy-MM-dd");
-            Task<HttpResponseMessage> tradeRequestTask = 
-                httpClient.GetAsync("https://apiclearing.test.nordpoolgroup.com/api/portfolios/trades?fromDeliveryHour=" + todayDate);
-            HttpResponseMessage response = tradeRequestTask.Result;
-            string responseData = response.Content.ReadAsStringAsync().Result;
-
-            List<Trade> trades = JsonConvert.DeserializeObject<List<Trade>>(responseData);
-
-            PrintTradesOnConsole(trades);
-        }
-
-        private static void PrintTradesOnConsole(List<Trade> trades)
-        {
-            JsonSerializerSettings serializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
-            serializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-
-            foreach (Trade trade in trades)
+            if (args.Length == 0 || !ResolveCommand(args[0].ToLower()))
             {
-                string formattedJsonTrade = JsonConvert.SerializeObject(trade, serializerSettings);
-                Console.WriteLine(formattedJsonTrade);
-                Console.WriteLine("Press enter for next trade");
-                Console.ReadLine();
+                string arg;
+                do
+                {
+                    PrintHelp();
+                    arg = Console.ReadLine();
+                }
+                while (!ResolveCommand(arg));
             }
         }
 
-        public static string GetAppSettingValue(string appSettingKey, bool canBeEmpty = false)
+        private static bool ResolveCommand(string arg)
         {
-            string value = ConfigurationManager.AppSettings[appSettingKey];
-            if (!canBeEmpty && string.IsNullOrEmpty(value))
+            if (arg == "single" || arg == "s")
             {
-                string message = string.Format("Can not find value for appSetting key '{0}'.", appSettingKey);
-                throw new ConfigurationErrorsException(message);
+                Console.WriteLine("'single' selected");
+                SingleRequestClient singleRequestClient = new SingleRequestClient();
+                singleRequestClient.MakeSingleRequest();
+                return true;
             }
-            return value;
+
+            return false;
+        }
+
+        private static void PrintHelp()
+        {
+            Console.WriteLine("Usage: NordPool.ClearingTradeCaptureAPI.Sample [command]");
+            Console.WriteLine("Commands:");
+            Console.WriteLine("\ts[ingle]   - make single request and print the result trades on console one by one");
+            Console.WriteLine("\tr[epeated] - make repeated requests every 1 minute and print results in compact tabular format");
+            Console.WriteLine("If command is omitted, an interactive prompt is shown.");
         }
     }
 }
