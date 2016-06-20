@@ -27,6 +27,13 @@
                 singleRequestClient.MakeSingleRequest();
                 return true;
             }
+            if (arg == "repeated" || arg == "r")
+            {
+                Console.WriteLine("'repeated' selected");
+                RepeatedRequestClient repeatedRequestClient = new RepeatedRequestClient();
+                repeatedRequestClient.MakeRepeatedRequests();
+                return true;
+            }
 
             return false;
         }

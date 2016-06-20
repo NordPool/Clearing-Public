@@ -22,8 +22,8 @@
             HttpClient httpClient = new HttpClient();
             httpClient.SetBearerToken(tokenResponse.AccessToken);
 
-            string todayDate = DateTime.Now.Date.ToString("yyyy-MM-dd");
-            string requestUrl = "https://apiclearing.test.nordpoolgroup.com/api/portfolios/trades?fromDeliveryHour=" + todayDate;
+            string deliveryDate = GetDeliveryDate();
+            string requestUrl = GetAppSettingValue("TradeRequestBaseUrl") + deliveryDate;
 
             Console.WriteLine("Requesting trades from URL: " + requestUrl);
             Task<HttpResponseMessage> tradeRequestTask = httpClient.GetAsync(requestUrl);
@@ -40,7 +40,7 @@
             List<Trade> trades = JsonConvert.DeserializeObject<List<Trade>>(responseData);
             Console.WriteLine("Requesting trades SUCCEEDED, result contains {0} trades", trades.Count);
 
-            PrintTradesOnConsole(trades);
+            PrintTradesOnConsoleOneByOne(trades);
             Console.ReadLine();
         }
     }

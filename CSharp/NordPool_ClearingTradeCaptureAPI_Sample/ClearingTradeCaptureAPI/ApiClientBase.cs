@@ -49,7 +49,7 @@
             return true;
         }
 
-        protected static void PrintTradesOnConsole(List<Trade> trades)
+        protected static void PrintTradesOnConsoleOneByOne(IEnumerable<Trade> trades)
         {
             JsonSerializerSettings serializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
             serializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
@@ -58,9 +58,42 @@
             {
                 string formattedJsonTrade = JsonConvert.SerializeObject(trade, serializerSettings);
                 Console.WriteLine(formattedJsonTrade);
-                Console.WriteLine("Press enter for next trade");
+                Console.WriteLine("Press enter for next trade, CTRL-C to quit");
                 Console.ReadLine();
             }
+        }
+
+        protected static void PrintTradesOnConsoleAsTable(IEnumerable<Trade> trades)
+        {
+            Console.WriteLine("                   Port-    Short-                               Unit");
+            Console.WriteLine("Delivery start     folio    name    Market  Area        Qty      price          Amount");
+            Console.WriteLine("--------------------------------------------------------------------------------------");
+
+            foreach (Trade trade in trades)
+            {
+                Console.WriteLine("{0}  {1,-7}  {2,-7}  {3,-6}  {4, -4}  {5,9:N1}  {6,9:N2}  {7,14:N2}",
+                    trade.DeliveryStartTime.ToString("yyyy-MM-dd HH:mm"),
+                    trade.Portfolio,
+                    trade.Portfolio,
+                    trade.Market,
+                    trade.Area,
+                    trade.Quantity,
+                    trade.UnitPrice,
+                    trade.Amount);
+            }
+        }
+
+        protected static string GetDeliveryDate()
+        {
+            string deliveryDateConfig = GetAppSettingValue("DeliveryDate", true);
+            DateTime deliveryDate;
+            if (!string.IsNullOrEmpty(deliveryDateConfig) && DateTime.TryParse(deliveryDateConfig, out deliveryDate))
+            {
+                return deliveryDateConfig;
+            }
+
+            string todayDate = DateTime.Now.Date.ToString("yyyy-MM-dd");
+            return todayDate;
         }
 
         protected static string GetAppSettingValue(string appSettingKey, bool canBeEmpty = false)
