@@ -5,6 +5,7 @@
     using System.Diagnostics;
     using System.Net;
     using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
     using System.Timers;
 
@@ -94,6 +95,19 @@
                 List<Trade> trades = RequestTrades();
 
                 PrintTradesOnConsoleAsTable(trades);
+            }
+            catch (Exception ex)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Unexpected exception: '{0}'", ex.Message);
+
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    sb.AppendFormat(" '{0}'", ex.Message);
+                }
+
+                Console.WriteLine(sb.ToString());
             }
             finally
             {
