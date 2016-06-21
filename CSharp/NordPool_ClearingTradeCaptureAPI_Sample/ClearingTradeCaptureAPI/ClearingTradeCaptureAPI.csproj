@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiClientBase.cs" />
+    <Compile Include="DeltaSearchClient.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

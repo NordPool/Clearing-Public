@@ -34,6 +34,13 @@
                 repeatedRequestClient.MakeRepeatedRequests();
                 return true;
             }
+            if (arg == "delta" || arg == "d")
+            {
+                Console.WriteLine("'delta' selected");
+                DeltaSearchClient deltaSearchClient = new DeltaSearchClient();
+                deltaSearchClient.MakeRepeatedRequests();
+                return true;
+            }
 
             return false;
         }
@@ -43,7 +50,8 @@
             Console.WriteLine("Usage: NordPool.ClearingTradeCaptureAPI.Sample [command]");
             Console.WriteLine("Commands:");
             Console.WriteLine("\ts[ingle]   - make single request and print the result trades on console one by one");
-            Console.WriteLine("\tr[epeated] - make repeated requests every 1 minute and print results in compact tabular format");
+            Console.WriteLine("\tr[epeated] - make repeated requests every 1 minute and print results tabular format");
+            Console.WriteLine("\td[delta]   - make delta search requests every 1 minute and print results tabular format");
             Console.WriteLine("If command is omitted, an interactive prompt is shown.");
         }
     }
