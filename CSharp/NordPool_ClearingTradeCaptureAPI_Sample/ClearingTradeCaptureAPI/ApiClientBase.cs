@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics;
     using System.Threading.Tasks;
 
     using Newtonsoft.Json;
@@ -26,8 +27,12 @@
 
             OAuth2Client oAuth2Client = new OAuth2Client(new Uri(tokenRequestUrl), clientId, clientSecret, OAuth2Client.ClientAuthenticationStyle.PostValues);
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             Task<TokenResponse> tokenRequestTask = oAuth2Client.RequestResourceOwnerPasswordAsync(userName, password, scope);
             tokenResponse = tokenRequestTask.Result;
+
+            stopwatch.Stop();
 
             if (tokenResponse.IsError)
             {
@@ -45,7 +50,7 @@
                 return false;
             }
 
-            Console.WriteLine("Requesting token SUCCEEDED");
+            Console.WriteLine("Requesting token SUCCEEDED in {0}ms", stopwatch.ElapsedMilliseconds);
             return true;
         }
 

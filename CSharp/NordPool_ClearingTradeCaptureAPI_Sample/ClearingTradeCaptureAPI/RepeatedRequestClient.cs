@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -108,8 +109,12 @@
 
         private List<Trade> RequestTrades(bool recursiveCall = false)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             HttpResponseMessage response = HandleRequest();
             string responseData = response.Content.ReadAsStringAsync().Result;
+
+            stopwatch.Stop();
 
             if (!response.IsSuccessStatusCode)
             {
@@ -129,7 +134,7 @@
             }
 
             List<Trade> trades = JsonConvert.DeserializeObject<List<Trade>>(responseData);
-            Console.WriteLine("Requesting trades SUCCEEDED, result contains {0} trades", trades.Count);
+            Console.WriteLine("Requesting trades SUCCEEDED in {0}ms, result contains {1} trades", stopwatch.ElapsedMilliseconds, trades.Count);
             return trades;
         }
 
