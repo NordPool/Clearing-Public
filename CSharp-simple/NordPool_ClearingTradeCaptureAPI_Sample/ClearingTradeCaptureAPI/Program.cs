@@ -21,6 +21,7 @@
             string userName = GetAppSettingValue("Member_UserName");
             string password = GetAppSettingValue("Member_Password");
 
+            // Always use HTTPS (not plain HTTP) when sending requests that contain your credentials!
             OAuth2Client oAuth2Client = new OAuth2Client(new Uri("https://sts.nordpoolgroupppe.com/connect/token"),
                 clientId,
                 clientSecret,
@@ -32,7 +33,8 @@
             HttpClient httpClient = new HttpClient();
             httpClient.SetBearerToken(tokenResponse.AccessToken);
 
-            string todayDate = DateTime.Now.Date.ToString("yyyy-MM-dd");
+            // Clearing API time parameters are always interpreted to be in UTC time
+            string todayDate = DateTime.Now.Date.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm'Z'");
             Task<HttpResponseMessage> tradeRequestTask = 
                 httpClient.GetAsync("https://apiclearing.test.nordpoolgroup.com/api/portfolios/trades?fromDeliveryHour=" + todayDate);
             HttpResponseMessage response = tradeRequestTask.Result;
@@ -57,10 +59,10 @@
             }
         }
 
-        public static string GetAppSettingValue(string appSettingKey, bool canBeEmpty = false)
+        public static string GetAppSettingValue(string appSettingKey)
         {
             string value = ConfigurationManager.AppSettings[appSettingKey];
-            if (!canBeEmpty && string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
                 string message = string.Format("Can not find value for appSetting key '{0}'.", appSettingKey);
                 throw new ConfigurationErrorsException(message);
