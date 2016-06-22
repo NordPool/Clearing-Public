@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.Diagnostics;
+    using System.Text;
     using System.Threading.Tasks;
 
     using Newtonsoft.Json;
@@ -21,6 +22,7 @@
             string userName = GetAppSettingValue("Member_UserName");
             string password = GetAppSettingValue("Member_Password");
 
+            // Always use HTTPS (not plain HTTP) when sending requests that contain your credentials!
             string tokenRequestUrl = "https://sts.nordpoolgroupppe.com/connect/token";
 
             Console.WriteLine("Requesting token from URL: " + tokenRequestUrl);
@@ -88,6 +90,11 @@
             }
         }
 
+        /// <summary>
+        /// Either gets the value from a configuration parameter (for testing purposes), or if the configuration
+        /// value doesn't exist, gets the start of today's delivery day in UTC time.
+        /// </summary>
+        /// <returns></returns>
         protected static string GetDeliveryDate()
         {
             string deliveryDateConfig = GetAppSettingValue("DeliveryDate", true);
@@ -97,8 +104,8 @@
                 return deliveryDateConfig;
             }
 
-            string todayDate = DateTime.Now.Date.ToString("yyyy-MM-dd");
-            return todayDate;
+            string startOfDeliveryDayToday = GetStartOfDeliveryDayToday();
+            return startOfDeliveryDayToday;
         }
 
         protected static string GetAppSettingValue(string appSettingKey, bool canBeEmpty = false)
@@ -110,6 +117,34 @@
                 throw new ConfigurationErrorsException(message);
             }
             return value;
+        }
+
+        protected static string GetStartOfDeliveryDayToday()
+        {
+            // Clearing API time parameters are always interpreted to be in UTC time
+            return DateTime.Now.Date.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm'Z'");
+        }
+
+        protected static void CheckProtocol(string requestUrl)
+        {
+            if (!requestUrl.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ConfigurationErrorsException("Only use HTTPS protocol for requests, not plain HTTP");
+            }
+        }
+
+        protected static void ReportExceptionOnConsole(Exception ex)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("Unexpected exception: '{0}'", ex.Message);
+
+            while (ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+                sb.AppendFormat(" '{0}'", ex.Message);
+            }
+
+            Console.WriteLine(sb.ToString());
         }
     }
 }

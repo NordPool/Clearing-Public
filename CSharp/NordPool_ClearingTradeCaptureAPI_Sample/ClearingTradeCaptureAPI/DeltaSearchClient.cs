@@ -12,8 +12,9 @@
 
         protected override HttpResponseMessage HandleRequest()
         {
-            string startOfTradingDay = DateTime.Now.Date.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm'Z'");
-            string requestUrl = GetAppSettingValue("DeltaTradeRequestBaseUrl") + startOfTradingDay;
+            string startOfDeliveryDayToday = GetStartOfDeliveryDayToday();
+            string requestUrl = GetAppSettingValue("DeltaTradeRequestBaseUrl") + startOfDeliveryDayToday;
+            CheckProtocol(requestUrl);
 
             if (deltaTag != null)
             {

@@ -5,7 +5,6 @@
     using System.Diagnostics;
     using System.Net;
     using System.Net.Http;
-    using System.Text;
     using System.Threading.Tasks;
     using System.Timers;
 
@@ -65,26 +64,21 @@
             /* A new Elapsed event from the Timer might be triggered before the previous request has finished.
              * To not start a new request before the previous has finished, we implement synchronization logic
              * to skip making a request if one is already in progress.
-             */ 
+             */
 
-            bool thisThreadHasRequestInProgress = false;
+            lock (this)
+            {
+                if (requestInProgress)
+                {
+                    Console.WriteLine("Request already in progress, not starting a new one");
+                    return;
+                }
+
+                requestInProgress = true;
+            }
 
             try
             {
-                lock (this)
-                {
-                    if (requestInProgress)
-                    {
-                        Console.WriteLine("Request already in progress, not starting a new one");
-                        return;
-                    }
-                    else
-                    {
-                        requestInProgress = true;
-                        thisThreadHasRequestInProgress = true;
-                    }
-                }
-
                 // If the token expiration time is reached, request a new token before making a request for trades
                 if (DateTime.Now > tokenExpiration)
                 {
@@ -98,25 +92,13 @@
             }
             catch (Exception ex)
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Unexpected exception: '{0}'", ex.Message);
-
-                while (ex.InnerException != null)
-                {
-                    ex = ex.InnerException;
-                    sb.AppendFormat(" '{0}'", ex.Message);
-                }
-
-                Console.WriteLine(sb.ToString());
+                ReportExceptionOnConsole(ex);
             }
             finally
             {
-                if (thisThreadHasRequestInProgress)
+                lock (this)
                 {
-                    lock (this)
-                    {
-                        requestInProgress = false;
-                    }
+                    requestInProgress = false;
                 }
             }
         }
@@ -154,8 +136,9 @@
 
         protected virtual HttpResponseMessage HandleRequest()
         {
-            string deliveryDate = GetDeliveryDate();
-            string requestUrl = GetAppSettingValue("TradeRequestBaseUrl") + deliveryDate;
+            string fromDeliveryHour = GetDeliveryDate();
+            string requestUrl = GetAppSettingValue("TradeRequestBaseUrl") + fromDeliveryHour;
+            CheckProtocol(requestUrl);
 
             Console.WriteLine("Requesting trades from URL: " + requestUrl);
             Task<HttpResponseMessage> tradeRequestTask = HttpClient.GetAsync(requestUrl);
