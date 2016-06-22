@@ -10,6 +10,6 @@ The solution in *CSharp* folder contains a more evolved version of the sample ap
 * Repeated queries, querying trades by the Delivery time
 * Repeated queries, querying trades by the trading time, making use of the delta search functionality
 
-The last two options issues that would be necessary in a production-grade implementation, like:
+The last two options include implementation details that would be necessary in a production-grade implementation, like:
 * Refreshing an expired access token
 * Synchronizing requests so that a new request is not started until a new one is finished
