@@ -14,7 +14,7 @@
         public void MakeSingleRequest()
         {
             TokenResponse tokenResponse;
-            if (!GetToken(out tokenResponse))
+            if (!MakeTokenRequest(out tokenResponse))
             {
                 return;
             }

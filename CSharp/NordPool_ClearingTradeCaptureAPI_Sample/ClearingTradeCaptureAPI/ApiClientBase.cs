@@ -12,7 +12,7 @@
 
     public class ApiClientBase
     {
-        protected static bool GetToken(out TokenResponse tokenResponse)
+        protected static bool MakeTokenRequest(out TokenResponse tokenResponse)
         {
             string clientId = GetAppSettingValue("IdentityServer_ClientId");
             string clientSecret = GetAppSettingValue("IdentityServer_ClientSecret");

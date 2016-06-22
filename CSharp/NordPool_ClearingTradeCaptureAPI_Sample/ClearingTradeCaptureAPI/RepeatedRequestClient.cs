@@ -25,12 +25,12 @@
             HttpClient = new HttpClient();
         }
 
-        private bool RefreshToken()
+        private bool GetNewToken()
         {
             // synchronize getting the token to make sure only one request thread gets token at the same time
             lock (this)
             {
-                if (!GetToken(out tokenResponse))
+                if (!MakeTokenRequest(out tokenResponse))
                 {
                     return false;
                 }
@@ -46,7 +46,7 @@
         {
             Console.WriteLine("Making repeated requests, press Enter or CTRL-C to stop");
 
-            if (!RefreshToken())
+            if (!GetNewToken())
             {
                 return;
             }
@@ -88,8 +88,8 @@
                 // If the token expiration time is reached, request a new token before making a request for trades
                 if (DateTime.Now > tokenExpiration)
                 {
-                    Console.WriteLine("Token has expired, refreshing token");
-                    RefreshToken();
+                    Console.WriteLine("Token has expired, getting a new token");
+                    GetNewToken();
                 }
 
                 List<Trade> trades = RequestTrades();
@@ -135,8 +135,8 @@
                 // Avoid more than one level of recursion here
                 if (!recursiveCall && response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    Console.WriteLine("Got 401 Unauthorized response, refreshing token");
-                    if (RefreshToken())
+                    Console.WriteLine("Got 401 Unauthorized response, getting a new token");
+                    if (GetNewToken())
                     {
                         return RequestTrades(true);
                     }
