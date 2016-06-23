@@ -124,8 +124,11 @@
                     }
                 }
 
-                Console.WriteLine("ERROR - status code '{0} {1}', contents '{2}'", (int)response.StatusCode, response.StatusCode, responseData);
-                Console.ReadLine();
+                Console.WriteLine("ERROR - got response in {0}ms, status code '{1} {2}', contents '{3}'",
+                    stopwatch.ElapsedMilliseconds,
+                    (int)response.StatusCode,
+                    response.StatusCode,
+                    responseData);
                 return null;
             }
 

@@ -72,6 +72,11 @@
 
         protected static void PrintTradesOnConsoleAsTable(IEnumerable<Trade> trades)
         {
+            if (trades == null)
+            {
+                return;
+            }
+
             Console.WriteLine("                   Port-    Short-                               Unit");
             Console.WriteLine("Delivery start     folio    name    Market  Area        Qty      price          Amount");
             Console.WriteLine("--------------------------------------------------------------------------------------");
